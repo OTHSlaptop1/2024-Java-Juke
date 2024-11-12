@@ -2,7 +2,9 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot;
+package frc.robot.Drive;
+
+import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
@@ -10,11 +12,15 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.AnalogGyro;
+import edu.wpi.first.units.Angle;
+import edu.wpi.first.units.Distance;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Velocity;
 
 /** Represents a swerve drive style drivetrain. */
-public class Drivetrain {
-  public static final double kMaxSpeed = 3.0; // 3 meters per second
-  public static final double kMaxAngularSpeed = 2*Math.PI; // 1 rotation per second
+public class DriveSubsystem {
+  public static final Measure<Velocity<Distance>> kMaxSpeed = MetersPerSecond.of(3.0); // 3 meters per second
+  public static final Measure<Velocity<Angle>> kMaxAngularSpeed = RadiansPerSecond.of(2*Math.PI); // 1 rotation per second
 
   private final Translation2d m_frontLeftLocation = new Translation2d(0.381, 0.381);
   private final Translation2d m_frontRightLocation = new Translation2d(0.381, -0.381);
@@ -43,7 +49,7 @@ public class Drivetrain {
             m_backRight.getPosition()
           });
 
-  public Drivetrain() {
+  public DriveSubsystem() {
     m_gyro.reset();
   }
 
