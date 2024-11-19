@@ -12,13 +12,14 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.wpilibj.AnalogGyro;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Velocity;
 
 /** Represents a swerve drive style drivetrain. */
-public class DriveSubsystem {
+public class DriveSubsystem extends SubsystemBase {
   public static final Measure<Velocity<Distance>> kMaxSpeed = MetersPerSecond.of(3.0); // 3 meters per second
   public static final Measure<Velocity<Angle>> kMaxAngularSpeed = RadiansPerSecond.of(2*Math.PI); // 1 rotation per second
 
