@@ -18,7 +18,7 @@ import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 public class SwerveModule {
-  private static final double kWheelDiameter = 0.0508;
+  private static final double kWheelDiameter = 0.097; // in meters
 
   private static final double kModuleMaxAngularVelocity = DriveSubsystem.kMaxAngularSpeed.baseUnitMagnitude();
   private static final double kModuleMaxAngularAcceleration =
