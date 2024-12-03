@@ -6,12 +6,13 @@ package frc.robot.Drive;
 
 import static edu.wpi.first.units.Units.*;
 
+import com.ctre.phoenix6.hardware.Pigeon2;
+
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
-import edu.wpi.first.wpilibj.AnalogGyro;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.units.Angle;
 import edu.wpi.first.units.Distance;
@@ -33,7 +34,7 @@ public class DriveSubsystem extends SubsystemBase {
   private final SwerveModule m_backLeft = new SwerveModule(8, 7);
   private final SwerveModule m_backRight = new SwerveModule(6, 5);
 
-  private final AnalogGyro m_gyro = new AnalogGyro(10);
+  private final Pigeon2 m_gyro = new Pigeon2(10);
 
   private final SwerveDriveKinematics m_kinematics =
       new SwerveDriveKinematics(
@@ -89,5 +90,8 @@ public class DriveSubsystem extends SubsystemBase {
           m_backLeft.getPosition(),
           m_backRight.getPosition()
         });
+  }
+  public void resetGyro() {
+    m_gyro.reset();
   }
 }
