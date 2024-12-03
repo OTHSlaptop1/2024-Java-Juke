@@ -35,7 +35,11 @@ public class Robot extends TimedRobot {
     if (m_controller.getAButtonPressed()) {
       m_swerve.resetGyro();
     }
-    driveWithJoystick(true);
+    if (m_controller.getXButton()) {
+      m_swerve.SetXStance();
+    } else {
+      driveWithJoystick(true);
+    }
   }
 
   private void driveWithJoystick(boolean fieldRelative) {
