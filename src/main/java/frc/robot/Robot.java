@@ -20,6 +20,11 @@ public class Robot extends TimedRobot {
   private final SlewRateLimiter m_rotLimiter = new SlewRateLimiter(3);
 
   @Override
+  public void teleopInit() {
+    m_swerve.resetGyro();
+  }
+
+  @Override
   public void autonomousPeriodic() {
     driveWithJoystick(false);
     m_swerve.updateOdometry();
@@ -27,6 +32,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
+    if (m_controller.getAButtonPressed()) {
+      m_swerve.resetGyro();
+    }
     driveWithJoystick(true);
   }
 
