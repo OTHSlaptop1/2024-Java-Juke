@@ -26,6 +26,9 @@ class OdometrySubsystem(val drive: DriveSubsystem, val field: Field2d) : Subsyst
 
     override fun periodic() {
         // This method will be called once per scheduler run
+        var robotPose2d = odometry.update(drive.getRotation2dHeading(), drive.getModulePositions())
+        odometryRobotPublisher.set(robotPose2d)
+        field.setRobotPose(robotPose2d)
     }
 
     override fun simulationPeriodic() {
