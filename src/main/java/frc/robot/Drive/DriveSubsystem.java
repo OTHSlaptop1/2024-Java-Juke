@@ -67,6 +67,8 @@ public class DriveSubsystem extends SubsystemBase {
    */
   public void drive(
       double xSpeed, double ySpeed, double rot, boolean fieldRelative, double periodSeconds) {
+
+    System.out.println("x: " + xSpeed + "y: " + ySpeed + "rot: " + rot);
     var swerveModuleStates =
         m_kinematics.toSwerveModuleStates(
             ChassisSpeeds.discretize(

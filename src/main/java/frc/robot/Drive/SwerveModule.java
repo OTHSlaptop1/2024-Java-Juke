@@ -14,6 +14,7 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.SparkPIDController;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
@@ -35,8 +36,8 @@ public class SwerveModule {
   private final AbsoluteEncoder m_turningEncoder;
 
   // Gains are for example purposes only - must be determined for your own robot!
-  private final PIDController m_drivePIDController = new PIDController(.04, 0, 0);
-
+  private SparkPIDController m_drivePIDController;
+  private SparkPIDController m_turnPIDController;
   // Gains are for example purposes only - must be determined for your own robot!
   private final ProfiledPIDController m_turningPIDController =
       new ProfiledPIDController(
@@ -48,7 +49,7 @@ public class SwerveModule {
 
   // Gains are for example purposes only - must be determined for your own robot!
   private final SimpleMotorFeedforward m_driveFeedforward = new SimpleMotorFeedforward(1, 3);
-  private final SimpleMotorFeedforward m_turnFeedforward = new SimpleMotorFeedforward(1, 0.5);
+  private final SimpleMotorFeedforward m_turnFeedforward = new SimpleMotorFeedforward(0, 0);
 
   /**
    * Constructs a SwerveModule with a drive motor, turning motor, drive encoder and turning encoder.
@@ -61,11 +62,26 @@ public class SwerveModule {
       int turningMotorChannel) {
     m_driveMotor = new CANSparkMax(driveMotorChannel, MotorType.kBrushless);
     m_turningMotor = new CANSparkMax(turningMotorChannel, MotorType.kBrushless);
-    
 
+    m_drivePIDController = m_driveMotor.getPIDController();
+    m_turnPIDController = m_turningMotor.getPIDController();
 
     m_driveEncoder = m_driveMotor.getEncoder();
     m_turningEncoder = m_turningMotor.getAbsoluteEncoder();
+
+    m_drivePIDController.setFeedbackDevice(m_driveEncoder);
+
+    m_drivingPIDController.SetP(kDrivingP); //insert values later
+    m_drivingPIDController.SetI(kDrivingI);
+    m_drivingPIDController.SetD(kDrivingD);
+    m_drivingPIDController.SetFF(kDrivingFF);
+    m_drivingPIDController.SetOutputRange(kDrivingMinOutput, kDrivingMaxOutput);
+
+    m_turnPIDController.setFeedbackDevice(m_turningEncoder);
+
+    m_turnPIDController.setPositionPIDWrappingEnabled(true);
+    m_turnPIDController.setPositionPIDWrappingMinInput(0);
+    m_turnPIDController.setPositionPIDWrappingMaxInput(2* Math.PI);
 
     m_driveEncoder.setPositionConversionFactor(kDrivePositionFactor);
     m_driveEncoder.setVelocityConversionFactor(kDrivePositionFactor / 60.0); //devided by 60 to convert to meters per second
