@@ -4,27 +4,28 @@
 
 package frc.robot.Drive;
 
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
 
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.SparkPIDController;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.CANSparkBase;
 
 public class SwerveModule {
   private static final double kWheelDiameter = 0.097; // in meters
 
-  private static final double kModuleMaxAngularVelocity = DriveSubsystem.kMaxAngularSpeed.baseUnitMagnitude();
-  private static final double kModuleMaxAngularAcceleration =
-      2 * Math.PI; // radians per second squared
+  //private static final double kModuleMaxAngularVelocity = DriveSubsystem.kMaxAngularSpeed.baseUnitMagnitude();
+  //private static final double kModuleMaxAngularAcceleration = 2 * Math.PI; // radians per second squared
+
+  private static final double kDrivingMotorFreeSpeedRps = 5676.0 / 60; //NEO free speed is 5676 RPM
+  private static final double kWheelCircumference = kWheelDiameter * Math.PI;
 
   private static final double kDrivingMotorReduction = 6.12;
+  private static final double kDriveWheelFreeSpeedRps = (kDrivingMotorFreeSpeedRps * kWheelCircumference / kDrivingMotorReduction);
 
   private static final double kDrivePositionFactor = kWheelDiameter * Math.PI / kDrivingMotorReduction;
 
@@ -35,20 +36,8 @@ public class SwerveModule {
   private final AbsoluteEncoder m_turningEncoder;
 
   // Gains are for example purposes only - must be determined for your own robot!
-  private final PIDController m_drivePIDController = new PIDController(.04, 0, 0);
-
-  // Gains are for example purposes only - must be determined for your own robot!
-  private final ProfiledPIDController m_turningPIDController =
-      new ProfiledPIDController(
-          .75,
-          0,
-          0.01,
-          new TrapezoidProfile.Constraints(
-              kModuleMaxAngularVelocity, kModuleMaxAngularAcceleration));
-
-  // Gains are for example purposes only - must be determined for your own robot!
-  private final SimpleMotorFeedforward m_driveFeedforward = new SimpleMotorFeedforward(1, 3);
-  private final SimpleMotorFeedforward m_turnFeedforward = new SimpleMotorFeedforward(1, 0.5);
+  private SparkPIDController m_drivePIDController;
+  private SparkPIDController m_turnPIDController;
 
   /**
    * Constructs a SwerveModule with a drive motor, turning motor, drive encoder and turning encoder.
@@ -61,11 +50,32 @@ public class SwerveModule {
       int turningMotorChannel) {
     m_driveMotor = new CANSparkMax(driveMotorChannel, MotorType.kBrushless);
     m_turningMotor = new CANSparkMax(turningMotorChannel, MotorType.kBrushless);
-    
 
+    m_drivePIDController = m_driveMotor.getPIDController();
+    m_turnPIDController = m_turningMotor.getPIDController();
 
     m_driveEncoder = m_driveMotor.getEncoder();
     m_turningEncoder = m_turningMotor.getAbsoluteEncoder();
+
+    m_drivePIDController.setFeedbackDevice(m_driveEncoder);
+
+    m_drivePIDController.setP(.04); //insert values later
+    m_drivePIDController.setI(0);
+    m_drivePIDController.setD(0);
+    m_drivePIDController.setFF(1 / kDriveWheelFreeSpeedRps);
+    m_drivePIDController.setOutputRange(-1, 1);
+
+    m_turnPIDController.setFeedbackDevice(m_turningEncoder);
+
+    m_turnPIDController.setP(.75);
+    m_turnPIDController.setI(0);
+    m_turnPIDController.setD(.01);
+    m_turnPIDController.setFF(0);
+    m_turnPIDController.setOutputRange(-1, 1);
+
+    m_turnPIDController.setPositionPIDWrappingEnabled(true);
+    m_turnPIDController.setPositionPIDWrappingMinInput(0);
+    m_turnPIDController.setPositionPIDWrappingMaxInput(2* Math.PI);
 
     m_driveEncoder.setPositionConversionFactor(kDrivePositionFactor);
     m_driveEncoder.setVelocityConversionFactor(kDrivePositionFactor / 60.0); //devided by 60 to convert to meters per second
@@ -74,7 +84,7 @@ public class SwerveModule {
 
     // Limit the PID Controller's input range between -pi and pi and set the input
     // to be continuous.
-    m_turningPIDController.enableContinuousInput(-Math.PI, Math.PI);
+    //m_turnPIDController.enableContinuousInput(-Math.PI, Math.PI);
   }
 
   /**
@@ -113,20 +123,9 @@ public class SwerveModule {
     // driving.
     state.speedMetersPerSecond *= state.angle.minus(encoderRotation).getCos();
 
+    m_drivePIDController.setReference(state.speedMetersPerSecond, CANSparkBase.ControlType.kVelocity);
+    m_turnPIDController.setReference(state.angle.getRadians(), CANSparkBase.ControlType.kPosition);
+
     // Calculate the drive output from the drive PID controller.
-    final double driveOutput =
-        m_drivePIDController.calculate(m_driveEncoder.getVelocity(), state.speedMetersPerSecond);
-
-    final double driveFeedforward = m_driveFeedforward.calculate(state.speedMetersPerSecond);
-
-    // Calculate the turning motor output from the turning PID controller.
-    final double turnOutput =
-        m_turningPIDController.calculate(m_turningEncoder.getPosition(), state.angle.getRadians());
-
-    final double turnFeedforward =
-        m_turnFeedforward.calculate(m_turningPIDController.getSetpoint().velocity);
-
-    m_driveMotor.setVoltage(driveOutput + driveFeedforward);
-    m_turningMotor.setVoltage(turnOutput + turnFeedforward);
   }
 }
