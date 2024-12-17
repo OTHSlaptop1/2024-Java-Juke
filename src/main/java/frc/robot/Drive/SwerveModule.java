@@ -5,6 +5,7 @@
 package frc.robot.Drive;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 
@@ -39,15 +40,21 @@ public class SwerveModule {
   private SparkPIDController m_drivePIDController;
   private SparkPIDController m_turnPIDController;
 
+  private Translation2d m_location;
+
   /**
    * Constructs a SwerveModule with a drive motor, turning motor, drive encoder and turning encoder.
    *
    * @param driveMotorChannel PWM output for the drive motor.
    * @param turningMotorChannel PWM output for the turning motor.
+   * @param x location on the x axis of the module from the Pidgeon gyro
+   * @param y location on the y axis of the module from the Pidgeon gyro
    */
   public SwerveModule(
       int driveMotorChannel,
-      int turningMotorChannel) {
+      int turningMotorChannel,
+      double x,
+      double y) {
     m_driveMotor = new CANSparkMax(driveMotorChannel, MotorType.kBrushless);
     m_turningMotor = new CANSparkMax(turningMotorChannel, MotorType.kBrushless);
 
@@ -79,6 +86,8 @@ public class SwerveModule {
 
     m_driveEncoder.setPositionConversionFactor(kDrivePositionFactor);
     m_driveEncoder.setVelocityConversionFactor(kDrivePositionFactor / 60.0); //devided by 60 to convert to meters per second
+
+    m_location = new Translation2d (x, y);
     
 
 
@@ -127,5 +136,8 @@ public class SwerveModule {
     m_turnPIDController.setReference(state.angle.getRadians(), CANSparkBase.ControlType.kPosition);
 
     // Calculate the drive output from the drive PID controller.
+  }
+  public Translation2d getLocation() {
+    return m_location;
   }
 }

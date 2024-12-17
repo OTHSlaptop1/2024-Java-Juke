@@ -9,7 +9,6 @@ import static edu.wpi.first.units.Units.*;
 import com.ctre.phoenix6.hardware.Pigeon2;
 
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
@@ -26,21 +25,16 @@ public class DriveSubsystem extends SubsystemBase {
   public static final Measure<Velocity<Distance>> kMaxSpeed = MetersPerSecond.of(3.0); // 3 meters per second
   public static final Measure<Velocity<Angle>> kMaxAngularSpeed = RadiansPerSecond.of(2*Math.PI); // 1 rotation per second
 
-  private final Translation2d m_frontLeftLocation = new Translation2d(0.381, 0.381);
-  private final Translation2d m_frontRightLocation = new Translation2d(0.381, -0.381);
-  private final Translation2d m_backLeftLocation = new Translation2d(-0.381, 0.381);
-  private final Translation2d m_backRightLocation = new Translation2d(-0.381, -0.381);
-
-  private final SwerveModule m_frontLeft = new SwerveModule(2, 1);
-  private final SwerveModule m_frontRight = new SwerveModule(4, 3);
-  private final SwerveModule m_backLeft = new SwerveModule(8, 7);
-  private final SwerveModule m_backRight = new SwerveModule(6, 5);
+  private final SwerveModule m_frontLeft = new SwerveModule(2, 1, 0.381, 0.381);
+  private final SwerveModule m_frontRight = new SwerveModule(4, 3, 0.381, -0.381);
+  private final SwerveModule m_backLeft = new SwerveModule(8, 7, -0.381, 0.381);
+  private final SwerveModule m_backRight = new SwerveModule(6, 5, -0.381, -0.381);
 
   private final Pigeon2 m_gyro = new Pigeon2(10);
 
   private final SwerveDriveKinematics m_kinematics =
       new SwerveDriveKinematics(
-          m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation);
+          m_frontLeft.getLocation(), m_frontRight.getLocation(), m_backLeft.getLocation(), m_backRight.getLocation());
 
   private final SwerveDriveOdometry m_odometry =
       new SwerveDriveOdometry(
